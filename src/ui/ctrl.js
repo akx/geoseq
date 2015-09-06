@@ -11,5 +11,5 @@ export default function ctrlUi(state, regen) {
     ]);
 
     const genAttrDiv = m("div", gen.attrs.map((attr) => attrui(attr, state.genOpts, regen)));
-    return m("div", [genSelectDiv, genAttrDiv]);
+    return m("div.ctrl-ui", [genSelectDiv, genAttrDiv]);
 }

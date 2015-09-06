@@ -45,6 +45,17 @@ function lineUi(state) {
     ];
 }
 
+function collUi(state) {
+    return state.colls.map((coll, i) => {
+        return m("circle.coll", {
+            cx: coll.x,
+            cy: coll.y,
+            r: 15 * (coll.life / 100),
+            key: "coll" + i,
+        });
+    });
+}
+
 
 export default function (state) {
     if(!state._elsAsM) {
@@ -75,6 +86,7 @@ export default function (state) {
             }
         },
         elsAsM,
-        lineUi(state)
+        lineUi(state),
+        collUi(state)
     );
 };

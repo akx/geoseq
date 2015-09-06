@@ -7,12 +7,15 @@ const lerp = require("./lerp");
 const gens = require("./gens");
 const ctrlUi = require("./ui/ctrl");
 const sceneUi = require("./ui/scene");
+const lineUi = require("./ui/line");
+const elcoll = require("./elcoll");
 
 const state = {
     els: [],
     lines: [
         linify({x1: 150, y1: 150, x2: 750, y2: 450})
     ],
+    colls: [],
     genName: "sidewalk",
     genOpts: {},
     lineInProgress: null
@@ -33,7 +36,10 @@ function scene() {
 }
 
 function ctrl() {
-    return m("div", [ctrlUi(state, regen)]);
+    return m("div", [
+        ctrlUi(state, regen),
+        lineUi(state, regen),
+    ]);
 }
 
 function tick() {
@@ -43,19 +49,36 @@ function tick() {
             checkColl = false;
             line.position = 0;
         }
-        line.position += 1 / line.speed;
-        while(line.position >= 1) {
-            line.position -= 1;
-            checkColl = false;
+        if(line.speed > 1) {
+            line.position += 1 / line.speed;
+            while (line.position >= 1) {
+                line.position -= 1;
+                checkColl = false;
+            }
         }
         const oldCx = line.cx;
         const oldCy = line.cy;
         const pos = Math.pow(line.position, 1 + line.nonlin);
         line.cx = lerp(line.x1, line.x2, pos);
         line.cy = lerp(line.y1, line.y2, pos);
-        if(checkColl) {
-
+        if(checkColl && oldCx && oldCy && line.cx && line.cy) {
+            var coll = null;
+            for(var i = 0; i < state.els.length; i++) {
+                coll = elcoll(state.els[i], oldCx, oldCy, line.cx, line.cy);
+                if(coll) break;
+            }
+            if(coll) {
+                state.colls.push({
+                    x: line.cx,
+                    y: line.cy,
+                    life: 100
+                });
+            }
         }
+    });
+    state.colls = state.colls.filter((coll) => {
+        coll.life --;
+        return (coll.life > 0);
     });
     m.redraw();
 }

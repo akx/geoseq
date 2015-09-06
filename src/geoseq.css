@@ -54,3 +54,17 @@ rect {
     stroke: #fff;
 }
 
+.coll {
+    stroke: #fc0;
+    stroke-width: 1px;
+    fill: transparent;
+}
+
+.ctrl-ui {
+    border-right: 2px solid greenyellow;
+}
+
+.line-ui {
+    margin-top: 15px;
+    border-right: 2px solid mediumpurple;
+}
