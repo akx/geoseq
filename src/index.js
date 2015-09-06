@@ -82,7 +82,7 @@ function tickLine(line, now, deltaTime) {
             var play = false;
             if (secSincePlay >= line.cooldown) {
                 const pitch = 1.0 + pos * (line.positionToPitch / 100.0);
-                audio.play(pitch);
+                audio.play(line.sound, pitch);
                 line.lastPlay = now;
                 play = true;
             }
