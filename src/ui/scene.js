@@ -57,8 +57,15 @@ function collUi(state) {
     });
 }
 
+function eventXY(event) {
+    return {
+        x: event.x || event.clientX,
+        y: event.y || event.clientY,
+    };
+}
+
 function handleDraw(state, event) {
-    var {x: x2, y: y2} = event;
+    var {x: x2, y: y2} = eventXY(event);
     const thisLine = state.lineInProgress;
     const lastLine = _.last(state.lines);
     var {x1, y1} = thisLine;
@@ -112,11 +119,9 @@ export default function (state) {
         {
             "width": window.innerWidth,
             "height": window.innerHeight,
-            "onmousedown": (e) => {
-                state.lineInProgress = {
-                    x1: e.x, y1: e.y,
-                    x2: e.x, y2: e.y,
-                };
+            "onmousedown": (event) => {
+                const {x, y} = eventXY(event);
+                state.lineInProgress = {x1: x, y1: y, x2: x, y2: y};
             },
             "onmousemove": (e) => {
                 if (state.lineInProgress === null) return;
