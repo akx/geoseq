@@ -10,6 +10,7 @@ const sceneUi = require("./ui/scene");
 const lineUi = require("./ui/line");
 const elcoll = require("./elcoll");
 const audio = require("./audio");
+const remaps = require("./remaps");
 
 const state = {
     els: [],
@@ -69,7 +70,7 @@ function tickLine(line, now, deltaTime) {
             pos = (pos >= 0.5 ? 1.0 - (pos - 0.5) * 2 : pos * 2);
             break;
     }
-    pos = Math.pow(pos, 1 + line.nonlin);
+    pos = remaps.nonlin(pos, line.nonlin);
     line.cx = lerp(line.x1, line.x2, pos);
     line.cy = lerp(line.y1, line.y2, pos);
     if (checkColl && oldCx && oldCy && line.cx && line.cy) {
@@ -82,7 +83,7 @@ function tickLine(line, now, deltaTime) {
             const secSincePlay = (now - line.lastPlay) / 1000.0;
             var play = false;
             if (secSincePlay >= line.cooldown) {
-                const pitch = 1.0 + pos * (line.positionToPitch / 100.0);
+                const pitch = remaps.z(pos, line.positionToPitch, 1.0);
                 audio.play(line.sound, pitch);
                 line.lastPlay = now;
                 play = true;
