@@ -20,7 +20,8 @@ const state = {
     genName: "sidewalk",
     genOpts: {},
     lineInProgress: null,
-    lastTickTime: 0
+    lastTickTime: 0,
+    drawMod: "normal"
 };
 
 

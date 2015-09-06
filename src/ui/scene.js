@@ -1,3 +1,4 @@
+const _ = require("lodash");
 const m = require("mithril");
 const linify = require("../linify");
 
@@ -56,6 +57,50 @@ function collUi(state) {
     });
 }
 
+function handleDraw(state, event) {
+    var {x: x2, y: y2} = event;
+    const thisLine = state.lineInProgress;
+    const lastLine = _.last(state.lines);
+    var {x1, y1} = thisLine;
+    const dy = y2 - y1;
+    const dx = x2 - x1;
+    const dst = Math.sqrt(dx * dx + dy * dy);
+    if (event.shiftKey) {
+        const quadSizeRad = Math.PI / 8;
+        const angRad = Math.atan2(dy, dx);
+        const angQtzRad = Math.floor(angRad / quadSizeRad) * quadSizeRad;
+        x2 = thisLine.x1 + Math.cos(angQtzRad) * dst;
+        y2 = y1 + Math.sin(angQtzRad) * dst;
+    }
+    switch(state.drawMod) {
+        case "collinear":
+        case "perpendicular":
+            if(lastLine) {
+                const lastDx = lastLine.x2 - lastLine.x1;
+                const lastDy = lastLine.y2 - lastLine.y1;
+                var ang = Math.atan2(lastDy, lastDx);
+                if(state.drawMod == "perpendicular") {
+                    ang += (dx < 0 ? -1 : +1) * Math.PI / 2;
+                }
+                x2 = thisLine.x1 + Math.cos(ang) * dst;
+                y2 = y1 + Math.sin(ang) * dst;
+            }
+            break;
+        case "repositionLast":
+            if(lastLine) {
+                const lastDx = lastLine.x2 - lastLine.x1;
+                const lastDy = lastLine.y2 - lastLine.y1;
+                thisLine.x1 = x2;
+                thisLine.y1 = y2;
+                x2 += lastDx;
+                y2 += lastDy;
+            }
+            break;
+
+    }
+    thisLine.x2 = x2;
+    thisLine.y2 = y2;
+}
 
 export default function (state) {
     if(!state._elsAsM) {
@@ -75,19 +120,7 @@ export default function (state) {
             },
             "onmousemove": (e) => {
                 if (state.lineInProgress === null) return;
-                var {x, y} = e;
-                if(e.shiftKey) {
-                    const dy = y - state.lineInProgress.y1;
-                    const dx = x - state.lineInProgress.x1;
-                    const dst = Math.sqrt(dx * dx + dy * dy);
-                    const quadSizeRad = Math.PI / 8;
-                    const angRad = Math.atan2(dy, dx);
-                    const angQtzRad = Math.floor(angRad / quadSizeRad) * quadSizeRad;
-                    x = state.lineInProgress.x1 + Math.cos(angQtzRad) * dst;
-                    y = state.lineInProgress.y1 + Math.sin(angQtzRad) * dst;
-                }
-                state.lineInProgress.x2 = x;
-                state.lineInProgress.y2 = y;
+                handleDraw(state, e);
             },
             "onmouseup": (e) => {
                 if (state.lineInProgress !== null) {
