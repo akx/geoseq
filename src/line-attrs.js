@@ -1,6 +1,7 @@
 const attr = require("./attr");
 
 export default [
+    attr.sel("behavior", "fwd", ["fwd", "rev", "bounce"]),
     attr.num("speed", 150, {min: 0, max: 2000, step: 1}),
     attr.num("nonlin", 0, {min: 0, max: 1, step: 0.05}),
     attr.num("cooldown", 0.1, {min: 0, max: 1, step: 0.01}),

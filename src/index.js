@@ -59,7 +59,16 @@ function tickLine(line, now, deltaTime) {
     }
     const oldCx = line.cx;
     const oldCy = line.cy;
-    const pos = Math.pow(line.position, 1 + line.nonlin);
+    var pos = line.position;
+    switch(line.behavior) {
+        case "rev":
+            pos = 1.0 - pos;
+            break;
+        case "bounce":
+            pos = (pos >= 0.5 ? 1.0 - (pos - 0.5) * 2 : pos * 2);
+            break;
+    }
+    pos = Math.pow(pos, 1 + line.nonlin);
     line.cx = lerp(line.x1, line.x2, pos);
     line.cy = lerp(line.y1, line.y2, pos);
     if (checkColl && oldCx && oldCy && line.cx && line.cy) {
@@ -72,7 +81,7 @@ function tickLine(line, now, deltaTime) {
             const secSincePlay = (now - line.lastPlay) / 1000.0;
             var play = false;
             if (secSincePlay >= line.cooldown) {
-                const pitch = 1.0 + line.position * (line.positionToPitch / 100.0);
+                const pitch = 1.0 + pos * (line.positionToPitch / 100.0);
                 audio.play(pitch);
                 line.lastPlay = now;
                 play = true;
