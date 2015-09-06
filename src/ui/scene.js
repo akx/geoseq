@@ -47,7 +47,7 @@ function lineUi(state) {
 
 function collUi(state) {
     return state.colls.map((coll, i) => {
-        return m("circle.coll", {
+        return m("circle.coll" + (coll.play ? ".play" : ""), {
             cx: coll.x,
             cy: coll.y,
             r: 15 * (coll.life / 100),

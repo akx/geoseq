@@ -55,7 +55,7 @@ rect {
 }
 
 .coll {
-    stroke: #fc0;
+    stroke: #666;
     stroke-width: 1px;
     fill: transparent;
 }
@@ -67,4 +67,8 @@ rect {
 .line-ui {
     margin-top: 15px;
     border-right: 2px solid mediumpurple;
+}
+
+.coll.play {
+    stroke: #fff;
 }

@@ -19,6 +19,7 @@
   },
   "dependencies": {
     "lodash": "^3.10.1",
-    "mithril": "^0.2.0"
+    "mithril": "^0.2.0",
+    "url-loader": "^0.5.6"
   }
 }

@@ -9,16 +9,18 @@ const ctrlUi = require("./ui/ctrl");
 const sceneUi = require("./ui/scene");
 const lineUi = require("./ui/line");
 const elcoll = require("./elcoll");
+const audio = require("./audio");
 
 const state = {
     els: [],
     lines: [
-        linify({x1: 150, y1: 150, x2: 750, y2: 450})
+        //linify({speed: 500, x1: 150, y1: 150, x2: 750, y2: 450, cooldown: 0.1})
     ],
     colls: [],
     genName: "sidewalk",
     genOpts: {},
-    lineInProgress: null
+    lineInProgress: null,
+    lastTickTime: 0
 };
 
 
@@ -42,42 +44,62 @@ function ctrl() {
     ]);
 }
 
-function tick() {
-    state.lines.forEach((line) => {
-        var checkColl = true;
-        if(isNaN(line.position)) {
+function tickLine(line, now, deltaTime) {
+    var checkColl = true;
+    if (isNaN(line.position)) {
+        checkColl = false;
+        line.position = 0;
+    }
+    if (line.speed > 1) {
+        line.position += line.speed / 1000000.0 * deltaTime;
+        while (line.position >= 1) {
+            line.position -= 1;
             checkColl = false;
-            line.position = 0;
         }
-        if(line.speed > 1) {
-            line.position += 1 / line.speed;
-            while (line.position >= 1) {
-                line.position -= 1;
-                checkColl = false;
-            }
+    }
+    const oldCx = line.cx;
+    const oldCy = line.cy;
+    const pos = Math.pow(line.position, 1 + line.nonlin);
+    line.cx = lerp(line.x1, line.x2, pos);
+    line.cy = lerp(line.y1, line.y2, pos);
+    if (checkColl && oldCx && oldCy && line.cx && line.cy) {
+        var coll = null;
+        for (var i = 0; i < state.els.length; i++) {
+            coll = elcoll(state.els[i], oldCx, oldCy, line.cx, line.cy);
+            if (coll) break;
         }
-        const oldCx = line.cx;
-        const oldCy = line.cy;
-        const pos = Math.pow(line.position, 1 + line.nonlin);
-        line.cx = lerp(line.x1, line.x2, pos);
-        line.cy = lerp(line.y1, line.y2, pos);
-        if(checkColl && oldCx && oldCy && line.cx && line.cy) {
-            var coll = null;
-            for(var i = 0; i < state.els.length; i++) {
-                coll = elcoll(state.els[i], oldCx, oldCy, line.cx, line.cy);
-                if(coll) break;
+        if (coll) {
+            const secSincePlay = (now - line.lastPlay) / 1000.0;
+            var play = false;
+            if (secSincePlay >= line.cooldown) {
+                const pitch = 1.0 + line.position * (line.positionToPitch / 100.0);
+                audio.play(pitch);
+                line.lastPlay = now;
+                play = true;
             }
-            if(coll) {
-                state.colls.push({
-                    x: line.cx,
-                    y: line.cy,
-                    life: 100
-                });
-            }
+            state.colls.push({
+                x: line.cx,
+                y: line.cy,
+                life: 100,
+                play
+            });
+
         }
+    }
+}
+
+function tick() {
+    if(!state.lines.length) return;
+    const now = +new Date();
+    var deltaTime = (now - state.lastTickTime);
+    state.lastTickTime = now;
+    if(deltaTime > 100) return;  // Oops?
+    state.lines.forEach((line) => {
+        tickLine(line, now, deltaTime);
+
     });
     state.colls = state.colls.filter((coll) => {
-        coll.life --;
+        coll.life--;
         return (coll.life > 0);
     });
     m.redraw();
@@ -92,7 +114,7 @@ function init() {
     m.mount(ctrlWrap, {view: ctrl, controller: _.noop});
     regen();
     m.redraw();
-    setInterval(tick, 1 / 30);
+    setInterval(tick, 1);
 }
 
 
