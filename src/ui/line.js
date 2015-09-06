@@ -19,7 +19,7 @@ function singleLineUi(line, state) {
                 state.lines = _.reject(state.lines, line);
             })
         ),
-        m("div", lineAttrs.map((attr) => attrui(attr, line)))
+        m("div", lineAttrs.map((attr) => attrui(attr, line, null, state.lines)))
     ]);
 }
 

@@ -25,9 +25,10 @@ function selAttr(attr, value, optsHash, regen) {
     }, attr.choices.map((choice) => m("option", {value: choice}, choice)));
 }
 
-export default function(attr, optsHash, regen=_.noop) {
+export default function(attr, optsHash, regen=_.noop, optsHashesArray=null) {
     const value = (optsHash[attr.id] !== undefined ? optsHash[attr.id] : attr.value);
     const reset = function() { delete optsHash[attr.id]; regen(); };
+    const copyToAll = function() { (optsHashesArray || []).forEach((hash) => { hash[attr.id] = value; }); };
     var randomize = null;
     var zero = null;
     var comp = null;
@@ -40,6 +41,7 @@ export default function(attr, optsHash, regen=_.noop) {
             valueLabel = value.toFixed(2);
             break;
         case "sel":
+            randomize = () => { optsHash[attr.id] = _.sample(attr.choices); regen(); };
             comp = selAttr(attr, value, optsHash, regen);
             break;
     }
@@ -49,6 +51,7 @@ export default function(attr, optsHash, regen=_.noop) {
             randomize && action("random", randomize),
             action("reset", reset),
             zero && action("zero", zero),
+            optsHashesArray && action("to all", copyToAll),
         ]),
         comp
     ]);
