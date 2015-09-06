@@ -75,8 +75,19 @@ export default function (state) {
             },
             "onmousemove": (e) => {
                 if (state.lineInProgress === null) return;
-                state.lineInProgress.x2 = e.x;
-                state.lineInProgress.y2 = e.y;
+                var {x, y} = e;
+                if(e.shiftKey) {
+                    const dy = y - state.lineInProgress.y1;
+                    const dx = x - state.lineInProgress.x1;
+                    const dst = Math.sqrt(dx * dx + dy * dy);
+                    const quadSizeRad = Math.PI / 8;
+                    const angRad = Math.atan2(dy, dx);
+                    const angQtzRad = Math.floor(angRad / quadSizeRad) * quadSizeRad;
+                    x = state.lineInProgress.x1 + Math.cos(angQtzRad) * dst;
+                    y = state.lineInProgress.y1 + Math.sin(angQtzRad) * dst;
+                }
+                state.lineInProgress.x2 = x;
+                state.lineInProgress.y2 = y;
             },
             "onmouseup": (e) => {
                 if (state.lineInProgress !== null) {
