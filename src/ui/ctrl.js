@@ -6,7 +6,10 @@ export default function ctrlUi(state, regen) {
     var gen = gens[state.genName];
     const genSelectDiv = m("div", [
         m("select",
-            {value: state.genName, onclick: function(e) { state.genName = this.value; }},
+            {value: state.genName, onclick: function(e) {
+                state.genName = this.value;
+                regen();
+            }},
             Object.keys(gens).map((genName) => m("option", {value: genName}, genName)))
     ]);
 
