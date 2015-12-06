@@ -14,9 +14,7 @@ const remaps = require("./remaps");
 
 const state = {
     els: [],
-    lines: [
-        //linify({speed: 500, x1: 150, y1: 150, x2: 750, y2: 450, cooldown: 0.1})
-    ],
+    lines: [],
     colls: [],
     genName: "sidewalk",
     genOpts: {},
